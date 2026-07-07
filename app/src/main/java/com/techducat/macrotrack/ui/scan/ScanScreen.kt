@@ -28,12 +28,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.techducat.macrotrack.R
 import com.techducat.macrotrack.data.db.FoodEntity
 import com.techducat.macrotrack.scanner.BarcodeAnalyzer
 import java.util.concurrent.Executors
@@ -44,7 +46,6 @@ fun ScanScreen(
     viewModel: ScanViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
     val state by viewModel.uiState.collectAsState()
 
     var hasCameraPermission by remember {
@@ -66,7 +67,7 @@ fun ScanScreen(
             CameraPreview(onBarcodeDetected = viewModel::onBarcodeDetected)
         } else {
             Column(modifier = Modifier.align(Alignment.Center).padding(24.dp)) {
-                Text("Camera permission is needed to scan barcodes.")
+                Text(stringResource(R.string.scan_permission_rationale))
             }
         }
 
@@ -75,20 +76,20 @@ fun ScanScreen(
             is ScanUiState.Found -> ScanOverlay {
                 Column {
                     Text(s.food.name, style = MaterialTheme.typography.titleMedium)
-                    Text("${s.food.caloriesPer100g.toInt()} kcal / 100g")
+                    Text(stringResource(R.string.scan_result_calories, s.food.caloriesPer100g.toInt()))
                     Button(onClick = { onFoodConfirmed(s.food) }, modifier = Modifier.padding(top = 8.dp)) {
-                        Text("Add to diary")
+                        Text(stringResource(R.string.action_add_to_diary))
                     }
                     Button(onClick = viewModel::resetToScanning, modifier = Modifier.padding(top = 4.dp)) {
-                        Text("Scan again")
+                        Text(stringResource(R.string.action_scan_again))
                     }
                 }
             }
             is ScanUiState.NotFound -> ScanOverlay {
                 Column {
-                    Text("Barcode ${s.barcode} not found in Open Food Facts.")
+                    Text(stringResource(R.string.scan_not_found, s.barcode))
                     Button(onClick = viewModel::resetToScanning, modifier = Modifier.padding(top = 8.dp)) {
-                        Text("Scan again")
+                        Text(stringResource(R.string.action_scan_again))
                     }
                 }
             }

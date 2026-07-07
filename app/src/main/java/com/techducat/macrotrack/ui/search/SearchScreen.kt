@@ -19,8 +19,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.techducat.macrotrack.R
 import com.techducat.macrotrack.data.db.FoodEntity
 import kotlin.math.roundToInt
 
@@ -35,7 +37,7 @@ fun SearchScreen(
         OutlinedTextField(
             value = state.query,
             onValueChange = viewModel::onQueryChange,
-            label = { Text("Search foods") },
+            label = { Text(stringResource(R.string.search_label)) },
             leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
             modifier = Modifier.fillMaxWidth()
         )
@@ -65,9 +67,12 @@ private fun FoodResultRow(food: FoodEntity, onClick: () -> Unit) {
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Text(food.name, style = MaterialTheme.typography.bodyLarge)
-            val brandPrefix = if (food.brand.isNotBlank()) "${food.brand} • " else ""
+            val calorieText = if (food.brand.isNotBlank())
+                stringResource(R.string.search_result_with_brand, food.brand, food.caloriesPer100g.roundToInt())
+            else
+                stringResource(R.string.search_result_no_brand, food.caloriesPer100g.roundToInt())
             Text(
-                "$brandPrefix${food.caloriesPer100g.roundToInt()} kcal / 100g",
+                calorieText,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

@@ -23,9 +23,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.techducat.macrotrack.R
 import com.techducat.macrotrack.data.db.DiaryEntryEntity
 import com.techducat.macrotrack.model.MealType
 import com.techducat.macrotrack.ui.theme.CarbsColor
@@ -43,16 +45,37 @@ fun DiaryScreen(viewModel: DiaryViewModel = hiltViewModel()) {
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         item { CaloriesSummaryCard(state) }
-        item { MacroBar("Protein", state.totals.proteinGrams, state.goals.proteinGrams, ProteinColor) }
-        item { MacroBar("Carbs", state.totals.carbsGrams, state.goals.carbsGrams, CarbsColor) }
-        item { MacroBar("Fat", state.totals.fatGrams, state.goals.fatGrams, FatColor) }
+        item {
+            MacroBar(
+                stringResource(R.string.diary_macro_protein),
+                state.totals.proteinGrams,
+                state.goals.proteinGrams,
+                ProteinColor
+            )
+        }
+        item {
+            MacroBar(
+                stringResource(R.string.diary_macro_carbs),
+                state.totals.carbsGrams,
+                state.goals.carbsGrams,
+                CarbsColor
+            )
+        }
+        item {
+            MacroBar(
+                stringResource(R.string.diary_macro_fat),
+                state.totals.fatGrams,
+                state.goals.fatGrams,
+                FatColor
+            )
+        }
 
         MealType.entries.forEach { meal ->
             val entries = state.entries.filter { MealType.fromStorage(it.mealType) == meal }
             if (entries.isNotEmpty()) {
                 item {
                     Text(
-                        text = meal.label,
+                        text = stringResource(meal.labelRes),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.padding(top = 8.dp)
@@ -67,7 +90,7 @@ fun DiaryScreen(viewModel: DiaryViewModel = hiltViewModel()) {
         if (state.entries.isEmpty()) {
             item {
                 Text(
-                    text = "Nothing logged yet today. Tap Search or Scan to add a food.",
+                    text = stringResource(R.string.diary_empty_state),
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -79,10 +102,14 @@ fun DiaryScreen(viewModel: DiaryViewModel = hiltViewModel()) {
 private fun CaloriesSummaryCard(state: DiaryUiState) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text("Calories", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.diary_calories_title), style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(8.dp))
             Text(
-                "${state.totals.calories.roundToInt()} / ${state.goals.calories.roundToInt()} kcal",
+                stringResource(
+                    R.string.diary_calories_progress,
+                    state.totals.calories.roundToInt(),
+                    state.goals.calories.roundToInt()
+                ),
                 style = MaterialTheme.typography.headlineMedium
             )
             Spacer(Modifier.height(8.dp))
@@ -108,7 +135,10 @@ private fun MacroBar(label: String, current: Double, goal: Double, color: androi
         Column(modifier = Modifier.padding(12.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(label, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
-                Text("${current.roundToInt()}g / ${goal.roundToInt()}g", style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    stringResource(R.string.diary_macro_progress, current.roundToInt(), goal.roundToInt()),
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
             Spacer(Modifier.height(6.dp))
             val progress = if (goal > 0) (current / goal).toFloat().coerceIn(0f, 1f) else 0f
@@ -135,14 +165,20 @@ private fun DiaryEntryRow(entry: DiaryEntryEntity, onDelete: () -> Unit) {
             Column {
                 Text(entry.foodName, style = MaterialTheme.typography.bodyLarge)
                 Text(
-                    "${entry.quantityGrams.roundToInt()}g • ${entry.calories.roundToInt()} kcal " +
-                        "• P${entry.proteinGrams.roundToInt()} C${entry.carbsGrams.roundToInt()} F${entry.fatGrams.roundToInt()}",
+                    stringResource(
+                        R.string.diary_entry_summary,
+                        entry.quantityGrams.roundToInt(),
+                        entry.calories.roundToInt(),
+                        entry.proteinGrams.roundToInt(),
+                        entry.carbsGrams.roundToInt(),
+                        entry.fatGrams.roundToInt()
+                    ),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             IconButton(onClick = onDelete) {
-                Icon(Icons.Filled.Delete, contentDescription = "Delete entry")
+                Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.action_delete_entry))
             }
         }
     }

@@ -147,6 +147,10 @@ dependencies {
     implementation("androidx.core:core-ktx:1.17.0")
     implementation("androidx.appcompat:appcompat:1.7.1")
     implementation("androidx.activity:activity-compose:1.9.3")
+    // Pulled in solely for the XML launch theme (Theme.Material3.DayNight.NoActionBar
+    // in themes.xml) — the app itself is 100% Compose/Material3, but the manifest's
+    // pre-Compose window background theme still resolves against this library.
+    implementation("com.google.android.material:material:1.13.0")
 
     // ===== LIFECYCLE =====
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")

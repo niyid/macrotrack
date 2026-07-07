@@ -73,3 +73,16 @@ block only kicks in if `RELEASE_STORE_FILE` is set, for release builds.
   exists; no screen calls it yet)
 - CSV export of the diary (still 100% local — this would be an explicit,
   user-triggered export, not automatic sync)
+
+## Gradle wrapper note
+
+`gradlew` / `gradlew.bat` and `gradle/wrapper/gradle-wrapper.properties` are included, but
+`gradle/wrapper/gradle-wrapper.jar` (a binary artifact) is **not**, since it wasn't part of the
+original upload and this environment has no network path to `services.gradle.org` to fetch it.
+Before building, generate it once with a local Gradle install:
+
+```
+gradle wrapper --gradle-version 8.11.1
+```
+
+or point Android Studio at the project and let it regenerate the wrapper on first sync.

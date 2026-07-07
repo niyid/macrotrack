@@ -18,8 +18,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.techducat.macrotrack.R
 import com.techducat.macrotrack.model.MacroTotals
 
 @Composable
@@ -39,27 +41,27 @@ fun GoalsScreen(viewModel: GoalsViewModel = hiltViewModel()) {
     }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text("Daily goals", style = MaterialTheme.typography.titleLarge)
+        Text(stringResource(R.string.goals_title), style = MaterialTheme.typography.titleLarge)
         Spacer(Modifier.height(16.dp))
 
         OutlinedTextField(
             value = calories, onValueChange = { calories = it },
-            label = { Text("Calories (kcal)") }, modifier = Modifier.fillMaxWidth()
+            label = { Text(stringResource(R.string.goals_calories_label)) }, modifier = Modifier.fillMaxWidth()
         )
         Spacer(Modifier.height(8.dp))
         OutlinedTextField(
             value = protein, onValueChange = { protein = it },
-            label = { Text("Protein (g)") }, modifier = Modifier.fillMaxWidth()
+            label = { Text(stringResource(R.string.goals_protein_label)) }, modifier = Modifier.fillMaxWidth()
         )
         Spacer(Modifier.height(8.dp))
         OutlinedTextField(
             value = carbs, onValueChange = { carbs = it },
-            label = { Text("Carbs (g)") }, modifier = Modifier.fillMaxWidth()
+            label = { Text(stringResource(R.string.goals_carbs_label)) }, modifier = Modifier.fillMaxWidth()
         )
         Spacer(Modifier.height(8.dp))
         OutlinedTextField(
             value = fat, onValueChange = { fat = it },
-            label = { Text("Fat (g)") }, modifier = Modifier.fillMaxWidth()
+            label = { Text(stringResource(R.string.goals_fat_label)) }, modifier = Modifier.fillMaxWidth()
         )
         Spacer(Modifier.height(24.dp))
 
@@ -76,7 +78,7 @@ fun GoalsScreen(viewModel: GoalsViewModel = hiltViewModel()) {
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Save")
+            Text(stringResource(R.string.action_save))
         }
     }
 }

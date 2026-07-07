@@ -1,9 +1,12 @@
 package com.techducat.macrotrack.data.repository
 
+import android.content.Context
+import com.techducat.macrotrack.R
 import com.techducat.macrotrack.data.db.FoodDao
 import com.techducat.macrotrack.data.db.FoodEntity
 import com.techducat.macrotrack.data.remote.OffProduct
 import com.techducat.macrotrack.data.remote.OpenFoodFactsApi
+import dagger.hilt.android.qualifiers.ApplicationContext
 import timber.log.Timber
 import java.util.UUID
 import javax.inject.Inject
@@ -20,7 +23,8 @@ import javax.inject.Singleton
 @Singleton
 class FoodRepository @Inject constructor(
     private val foodDao: FoodDao,
-    private val api: OpenFoodFactsApi
+    private val api: OpenFoodFactsApi,
+    @ApplicationContext private val context: Context
 ) {
 
     suspend fun getCachedRecent(limit: Int = 20): List<FoodEntity> =
@@ -83,10 +87,12 @@ class FoodRepository @Inject constructor(
 
     private fun mapToEntity(product: OffProduct, barcode: String): FoodEntity {
         val n = product.nutriments
+        val servingSizeLabel = product.servingSize.orEmpty()
         return FoodEntity(
             id = barcode.ifBlank { "off:${UUID.randomUUID()}" },
             barcode = barcode,
-            name = product.productName?.takeIf { it.isNotBlank() } ?: "Unknown product",
+            name = product.productName?.takeIf { it.isNotBlank() }
+                ?: context.getString(R.string.food_unknown_product),
             brand = product.brands.orEmpty(),
             caloriesPer100g = n?.energyKcal100g ?: 0.0,
             proteinPer100gGrams = n?.proteins100g ?: 0.0,
@@ -95,9 +101,23 @@ class FoodRepository @Inject constructor(
             fiberPer100gGrams = n?.fiber100g ?: 0.0,
             sugarPer100gGrams = n?.sugars100g ?: 0.0,
             sodiumPer100gMilligrams = (n?.sodium100g ?: 0.0) * 1000.0,
-            servingSizeLabel = product.servingSize.orEmpty(),
+            servingSizeGrams = parseServingSizeGrams(servingSizeLabel),
+            servingSizeLabel = servingSizeLabel,
             imageUrl = product.imageUrl.orEmpty(),
             source = "off"
         )
+    }
+
+    /**
+     * Open Food Facts' `serving_size` is a free-text label like "45 g", "1 bar (40g)",
+     * or "250ml" — never a bare number. AddEntryViewModel pre-fills the quantity field
+     * from [FoodEntity.servingSizeGrams], so without this parse step that field was
+     * always null for every scanned/searched food and the app silently fell back to a
+     * hardcoded "100" regardless of the product's actual serving size.
+     */
+    private fun parseServingSizeGrams(label: String): Double? {
+        if (label.isBlank()) return null
+        val match = Regex("""(\d+(?:[.,]\d+)?)\s*g\b""", RegexOption.IGNORE_CASE).find(label)
+        return match?.groupValues?.get(1)?.replace(',', '.')?.toDoubleOrNull()
     }
 }
