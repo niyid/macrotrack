@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <cloud-backup>
+        <!-- Diary data is local-only by design; allow default backup of the
+             Room DB so a user doesn't lose their food log on device transfer.
+             No network credentials or tokens exist in this app to exclude. -->
+    </cloud-backup>
+</data-extraction-rules>
