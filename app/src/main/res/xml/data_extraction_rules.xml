@@ -3,6 +3,9 @@
     <cloud-backup>
         <!-- Diary data is local-only by design; allow default backup of the
              Room DB so a user doesn't lose their food log on device transfer.
-             No network credentials or tokens exist in this app to exclude. -->
+             No network credentials or tokens exist in this app to exclude,
+             EXCEPT the I2P router's own identity/session key material, which
+             must never leave the device via cloud backup. -->
+        <exclude domain="file" path="i2p/macrotrack" />
     </cloud-backup>
 </data-extraction-rules>

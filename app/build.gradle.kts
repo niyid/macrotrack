@@ -31,6 +31,16 @@ if (localPropertiesFile.exists()) {
 fun getLocalProperty(key: String, defaultValue: String = ""): String =
     localProperties.getProperty(key) ?: System.getenv(key) ?: defaultValue
 
+// I2P outproxy support (see network/EmbeddedI2PRouter.kt + I2POutproxyTunnel.kt)
+// is optional at build time: the three JARs/AAR below are large binary build
+// artifacts that must be built from source (see app/libs/README.md) and are
+// deliberately excluded from version control. If they're absent the build
+// still succeeds, but BuildConfig.I2P_OUTPROXY_ENABLED is false and OFF calls
+// go direct instead of through I2P.
+val i2pLibsPresent = file("libs/router.jar").exists() &&
+    file("libs/sam.jar").exists() &&
+    file("libs/i2p-android-client.aar").exists()
+
 android {
     namespace = "com.techducat.macrotrack"
     compileSdk = 36
@@ -48,6 +58,10 @@ android {
         // Open Food Facts is a free, open, no-API-key database — safe to bake the
         // base URL in as a BuildConfig field so it can be swapped per-flavor/test.
         buildConfigField("String", "OFF_BASE_URL", "\"https://world.openfoodfacts.org/\"")
+
+        // True only when the I2P jars/AAR are present in app/libs/ at build time.
+        // See di/NetworkModule.kt + MacroTrackApp.kt for how this gates routing.
+        buildConfigField("boolean", "I2P_OUTPROXY_ENABLED", i2pLibsPresent.toString())
     }
 
     lint {
@@ -200,6 +214,34 @@ dependencies {
     implementation("com.squareup.moshi:moshi-kotlin:1.15.1")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     debugImplementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+
+    // ===== I2P EMBEDDED ROUTER (outproxy tunnel for Open Food Facts calls) =====
+    // Same optional-AAR pattern as buzzr-p2p/verzus-p2p. Place the built
+    // artifacts in app/libs/:
+    //   i2p-android-client.aar  — from i2p.android.base (./gradlew assembleRelease)
+    //   router.jar              — from i2p.i2p (ant pkg)
+    //   sam.jar                 — from i2p.i2p (ant pkg)
+    //
+    // See app/libs/README.md for full instructions.
+    //
+    // ⚠ Without these files the build still succeeds but I2P is disabled —
+    //   BuildConfig.I2P_OUTPROXY_ENABLED is false and OFF calls go direct.
+    if (file("libs/i2p-android-client.aar").exists()) {
+        add("implementation", files("libs/i2p-android-client.aar"))
+        add("implementation", "net.i2p.android:helper:0.9.5")
+    } else {
+        logger.warn("⚠️  libs/i2p-android-client.aar not found — I2P outproxy disabled. See app/libs/README.md")
+    }
+    if (file("libs/router.jar").exists()) {
+        add("implementation", files("libs/router.jar"))
+    } else {
+        logger.warn("⚠️  libs/router.jar not found. See app/libs/README.md")
+    }
+    if (file("libs/sam.jar").exists()) {
+        add("implementation", files("libs/sam.jar"))
+    } else {
+        logger.warn("⚠️  libs/sam.jar not found. See app/libs/README.md")
+    }
 
     // ===== IMAGES =====
     implementation("io.coil-kt:coil-compose:2.7.0")
