@@ -34,18 +34,37 @@ class FoodRepository @Inject constructor(
 
     suspend fun searchLocal(query: String): List<FoodEntity> = foodDao.search(query)
 
-    /** Barcode scan result → FoodEntity, or null if not found locally or on Open Food Facts. */
-    suspend fun lookupBarcode(barcode: String): FoodEntity? {
-        foodDao.getByBarcode(barcode)?.let { return it }
+    /**
+     * Barcode scan result. Split out from a plain nullable [FoodEntity] because
+     * "the product genuinely isn't in Open Food Facts" and "the lookup itself
+     * failed" are different situations the UI should say different things
+     * about — this matters a lot more now that OFF calls go through
+     * [com.techducat.macrotrack.network.I2POutproxyTunnel]: a cold I2P router
+     * can take anywhere up to several minutes to bootstrap on first run (see
+     * EmbeddedI2PRouter.SAM_WAIT_TIMEOUT_MS), and every lookup during that
+     * window used to come back indistinguishable from "not found".
+     */
+    sealed interface BarcodeLookup {
+        data class Found(val food: FoodEntity) : BarcodeLookup
+        data object NotFound : BarcodeLookup
+        data class Unavailable(val cause: Throwable) : BarcodeLookup
+    }
+
+    /** Barcode scan result → cached hit, Open Food Facts hit, genuine miss, or lookup failure. */
+    suspend fun lookupBarcode(barcode: String): BarcodeLookup {
+        foodDao.getByBarcode(barcode)?.let { return BarcodeLookup.Found(it) }
 
         return try {
             val response = api.getProduct(barcode)
-            val product = response.product ?: return null
-            if (response.status != 1) return null
-            mapToEntity(product, barcode).also { foodDao.upsert(it) }
+            val product = response.product
+            if (response.status != 1 || product == null) {
+                BarcodeLookup.NotFound
+            } else {
+                BarcodeLookup.Found(mapToEntity(product, barcode).also { foodDao.upsert(it) })
+            }
         } catch (e: Exception) {
             Timber.w(e, "Open Food Facts lookup failed for barcode=%s", barcode)
-            null
+            BarcodeLookup.Unavailable(e)
         }
     }
 

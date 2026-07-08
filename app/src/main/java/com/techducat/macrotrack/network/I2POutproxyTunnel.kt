@@ -59,11 +59,19 @@ import java.util.concurrent.atomic.AtomicInteger
  * Messenger Service. Treat this as unverified against real router logs until
  * it's been exercised against a live SAM bridge.
  *
- * Known public outproxy destinations (volunteer-run; both currently relay
- * through Tor to reach the clearnet — see EmbeddedI2PRouter kdoc for the
- * privacy/latency tradeoffs this implies):
- *   - false.i2p
- *   - outproxy-tor.meeh.i2p
+ * Known public outproxy destinations (volunteer-run; StormyCloud additionally
+ * relays through Tor to reach the clearnet — see EmbeddedI2PRouter kdoc for
+ * the privacy/latency tradeoffs this implies):
+ *   - exit.stormycloud.i2p — I2P's official default outproxy since Aug 2022.
+ *     Used here by its b32 form (see [DEFAULT_OUTPROXY]) rather than the
+ *     friendly hostname: SAM's DESTINATION resolves friendly ".i2p" names via
+ *     the local hosts.txt addressbook, which EmbeddedI2PRouter only ever
+ *     creates empty (no subscription/jump-service fetch is wired up). A
+ *     ".b32.i2p" address is self-certifying — its hash *is* the destination
+ *     — so it resolves directly via netDb lookup with no addressbook entry
+ *     needed. (The old default here, false.i2p, is additionally long dead —
+ *     degrading for years before StormyCloud replaced it as the project's
+ *     default; see https://geti2p.net/en/blog/post/2022/8/4/Enable-StormyCloud.)
  */
 class I2POutproxyTunnel(
     private val samHost: String = "127.0.0.1",
@@ -73,7 +81,12 @@ class I2POutproxyTunnel(
     companion object {
         private const val TAG = "I2POutproxyTunnel"
 
-        const val DEFAULT_OUTPROXY = "false.i2p"
+        // exit.stormycloud.i2p's b32 address (verified against StormyCloud's own
+        // docs: https://www.stormycloud.org/updating-i2p-outproxy/). Volunteer
+        // infrastructure can be retired or rotated without notice — if this starts
+        // failing, check that page for a current address before assuming a bug
+        // elsewhere in the tunnel/SAM code.
+        const val DEFAULT_OUTPROXY = "5d4s7pcvfdpftfk7npc7hllyujhufsdprtrf4o53i44rgsa2xbwa.b32.i2p"
         const val DEFAULT_LOCAL_PROXY_PORT = 8118
 
         private const val SAM_SOCKET_TIMEOUT_MS = 90_000

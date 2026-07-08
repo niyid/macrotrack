@@ -68,9 +68,18 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideOkHttpClient(tunnel: I2POutproxyTunnel): OkHttpClient {
+        // I2P-routed requests still go over loopback to reach the local proxy
+        // instantly, but the actual round trip from there — several I2P garlic
+        // hops, then the outproxy's own Tor exit hop to reach OFF's clearnet
+        // servers — is much slower than a direct connection. Direct-fallback
+        // timeouts (when the I2P libs aren't present) stay tight since that path
+        // really is just one plain HTTPS hop.
+        val connectTimeoutSec = if (BuildConfig.I2P_OUTPROXY_ENABLED) 60L else 15L
+        val readTimeoutSec = if (BuildConfig.I2P_OUTPROXY_ENABLED) 120L else 30L
+
         val builder = OkHttpClient.Builder()
-            .connectTimeout(15, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
+            .connectTimeout(connectTimeoutSec, TimeUnit.SECONDS)
+            .readTimeout(readTimeoutSec, TimeUnit.SECONDS)
 
         if (BuildConfig.I2P_OUTPROXY_ENABLED) {
             builder

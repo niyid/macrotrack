@@ -69,7 +69,13 @@ techducat app's assets/ if you've already set one up), matching the same
 
 ## Outproxy destination
 
-`I2POutproxyTunnel` defaults to `false.i2p`. This is a volunteer-run outproxy
-that itself relays clearnet requests through Tor — see the kdoc in
-`I2POutproxyTunnel.kt` and `EmbeddedI2PRouter.kt` for the tradeoffs. No API key
-or account is needed for it since Open Food Facts itself requires none.
+`I2POutproxyTunnel` defaults to `exit.stormycloud.i2p` (I2P's official default
+outproxy since Aug 2022), addressed by its b32 form
+(`5d4s7pcvfdpftfk7npc7hllyujhufsdprtrf4o53i44rgsa2xbwa.b32.i2p`) rather than
+the friendly hostname, since SAM has no addressbook entry to resolve the
+hostname against and b32 addresses resolve directly via netDb. No API key or
+account is needed for it since Open Food Facts itself requires none. This is
+volunteer infrastructure and can change — see the kdoc in
+`I2POutproxyTunnel.kt` and `EmbeddedI2PRouter.kt` for the tradeoffs, and
+https://www.stormycloud.org/updating-i2p-outproxy/ if lookups start failing
+and you need to check for a current address.

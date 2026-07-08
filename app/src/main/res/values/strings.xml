@@ -36,6 +36,8 @@
     <string name="action_add_to_diary">Add to diary</string>
     <string name="action_scan_again">Scan again</string>
     <string name="scan_not_found">Barcode %1$s not found in Open Food Facts.</string>
+    <string name="scan_network_unavailable">Couldn\'t reach Open Food Facts. The privacy network may still be starting up — this can take a few minutes on first launch.</string>
+    <string name="action_retry">Retry</string>
 
     <!-- Add entry screen -->
     <string name="add_entry_food_not_found">Food not found.</string>

@@ -93,6 +93,17 @@ fun ScanScreen(
                     }
                 }
             }
+            is ScanUiState.Unavailable -> ScanOverlay {
+                Column {
+                    Text(stringResource(R.string.scan_network_unavailable))
+                    Button(onClick = viewModel::retryLastLookup, modifier = Modifier.padding(top = 8.dp)) {
+                        Text(stringResource(R.string.action_retry))
+                    }
+                    Button(onClick = viewModel::resetToScanning, modifier = Modifier.padding(top = 4.dp)) {
+                        Text(stringResource(R.string.action_scan_again))
+                    }
+                }
+            }
             ScanUiState.Scanning -> Unit
         }
     }
