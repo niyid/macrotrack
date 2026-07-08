@@ -8,14 +8,13 @@
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
 .DS_Store
-/build
-/captures
+build/
+captures/
 .externalNativeBuild
 .cxx
 local.properties
 *.aab
 *.apk
-local.properties
 *.jks
 *.keystore
 app/libs/router.jar
