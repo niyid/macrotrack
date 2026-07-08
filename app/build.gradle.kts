@@ -44,6 +44,7 @@ val i2pLibsPresent = file("libs/router.jar").exists() &&
 android {
     namespace = "com.techducat.macrotrack"
     compileSdk = 36
+    ndkVersion = "29.0.13113456"
 
     defaultConfig {
         applicationId = "com.techducat.macrotrack"
@@ -213,7 +214,12 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-moshi:$retrofitVersion")
     implementation("com.squareup.moshi:moshi-kotlin:1.15.1")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    debugImplementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+    // Must be `implementation`, not `debugImplementation`: NetworkModule.kt imports
+    // HttpLoggingInterceptor unconditionally (its usage is gated at runtime by
+    // BuildConfig.DEBUG, but the class still needs to be on the *compile*
+    // classpath for release too, or compilePlaystoreReleaseKotlin fails with
+    // "Unresolved reference 'logging'").
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
     // ===== I2P EMBEDDED ROUTER (outproxy tunnel for Open Food Facts calls) =====
     // Same optional-AAR pattern as buzzr-p2p/verzus-p2p. Place the built

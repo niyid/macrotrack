@@ -41,8 +41,8 @@ import javax.inject.Singleton
  * block (off the main thread) until that bootstrap finishes, rather than
  * failing immediately on app cold start.
  *
- * If BuildConfig.I2P_OUTPROXY_ENABLED is false -- e.g. app/libs/*.jar are
- * missing at build time, see app/libs/README.md -- this falls back to a plain
+ * If BuildConfig.I2P_OUTPROXY_ENABLED is false -- e.g. the JARs under
+ * app/libs are missing at build time, see app/libs/README.md -- this falls back to a plain
  * direct OkHttpClient so the app still builds and runs, just without the
  * outproxy.
  */
