@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <full-backup-content>
-    <!-- Legacy (pre-Android 12) backup rules -- mirror data_extraction_rules.xml:
+    <!-- Legacy (pre-Android 12) backup rules; mirror data_extraction_rules.xml:
          exclude the I2P router's identity/session key material from backup. -->
     <exclude domain="file" path="i2p/macrotrack" />
 </full-backup-content>
