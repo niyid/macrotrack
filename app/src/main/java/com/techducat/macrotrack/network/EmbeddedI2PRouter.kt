@@ -299,7 +299,19 @@ class EmbeddedI2PRouter private constructor(
                 }
 
                 samBridgeInstance = bridge
-                samClass.getMethod("run").invoke(bridge)
+
+                // The documented external-use path is startup() (SAMBridge implements
+                // ClientApp; the constructor deliberately does NOT start the listener
+                // thread). Older/forked builds have been seen exposing a bare run()
+                // instead, so fall back to that -- same defensive pattern as the
+                // constructor lookup above, since this class is unverified against a
+                // live SAM bridge (see class kdoc).
+                val startMethod = try {
+                    samClass.getMethod("startup")
+                } catch (_: NoSuchMethodException) {
+                    samClass.getMethod("run")
+                }
+                startMethod.invoke(bridge)
             } catch (e: Exception) {
                 Log.e(TAG, "SAMBridge failed: ${e.message}", e)
             }

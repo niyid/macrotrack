@@ -82,6 +82,16 @@ class FoodRepository @Inject constructor(
         }
     }
 
+    /**
+     * Drops cached Open Food Facts rows ([FoodEntity.source] == "off") that haven't been
+     * touched in over [maxAgeMs]. Manually-entered foods are never pruned since they have
+     * no network source to re-fetch from. Safe to call opportunistically (e.g. on app
+     * start) since `foods` is a rebuildable cache — see FoodEntity's kdoc.
+     */
+    suspend fun pruneStaleCache(maxAgeMs: Long) {
+        foodDao.pruneStaleCache(System.currentTimeMillis() - maxAgeMs)
+    }
+
     suspend fun saveManualFood(
         name: String,
         brand: String,

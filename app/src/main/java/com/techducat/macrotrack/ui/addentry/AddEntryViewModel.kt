@@ -39,11 +39,19 @@ class AddEntryViewModel @Inject constructor(
             val food = foodRepository.getById(foodId)
             _uiState.value = _uiState.value.copy(
                 food = food,
-                quantityGrams = food?.servingSizeGrams?.toString() ?: "100",
+                quantityGrams = food?.servingSizeGrams?.let(::formatQuantity) ?: "100",
                 isLoading = false
             )
         }
     }
+
+    /**
+     * Renders a whole-number serving size as "45" rather than Double.toString()'s "45.0" —
+     * matches the plain "100" default and avoids a stray decimal in the quantity field for
+     * the common case (most Open Food Facts serving sizes are whole grams).
+     */
+    private fun formatQuantity(grams: Double): String =
+        if (grams == grams.toLong().toDouble()) grams.toLong().toString() else grams.toString()
 
     fun onQuantityChange(value: String) {
         _uiState.value = _uiState.value.copy(quantityGrams = value)

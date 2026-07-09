@@ -24,12 +24,13 @@
     public void shutdown(int);
 }
 
-# SAMBridge constructors tried in startSAMBridge() fallback chain
+# SAMBridge constructors + start methods tried in startSAM() fallback chain
 -keepclassmembers class net.i2p.sam.SAMBridge {
     public <init>(java.lang.String, int, boolean, java.util.Properties, java.lang.String, java.io.File, net.i2p.sam.SAMSecureSessionInterface);
     public <init>(java.lang.String, int, java.util.Properties);
     public <init>();
-    public void startListening();
+    public void startup();
+    public void run();
 }
 
 # RouterContext -- constructed internally by Router, must keep its name
